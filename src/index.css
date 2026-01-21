@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
+    "Droid Sans", "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+
+  
+  body {
+    background: white !important;
+    color: black !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    visibility: hidden;
+  }
+
+  /* Supprimer la grille à l'impression */
+  .grid {
+    display: block !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  /* Chaque reçu = 1 page */
+  .print-page {
+    page-break-after: always;
+    break-after: page;
+    width: 100%;
+  }
+
+  /* Dernière page sans saut */
+  .print-page:last-child {
+    page-break-after: auto;
+  }
+
+  /* Pas de page blanche après le dernier */
+  .print-receipt:last-child {
+    page-break-after: auto;
+    break-after: auto;
+  }
+
+    /* Make sure borders and backgrounds print */
+  .print-receipt {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    color-adjust: exact;
+  }
+
+    /* Show only print receipts */
+  .print-receipt,
+  .print-receipt * {
+    visibility: visible;
+  }
+}
