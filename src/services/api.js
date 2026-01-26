@@ -1,9 +1,7 @@
 import axios from "axios"
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api"
-
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: "https://fast-food-backend-qd11.onrender.com/api",
   headers: {
     "Content-Type": "application/json",
   },
@@ -12,7 +10,7 @@ const api = axios.create({
 // Menu API
 export const getMenu = async () => {
   try {
-    const response = await api.get("/menu")
+    const response = await api.get("/api/menu")
     return response.data
   } catch (error) {
     console.error("Error fetching menu:", error)
@@ -23,7 +21,7 @@ export const getMenu = async () => {
 // Orders API
 export const createOrder = async (orderData) => {
   try {
-    const response = await api.post("/orders", orderData)
+    const response = await api.post("/api/orders", orderData)
     return response.data
   } catch (error) {
     console.error("Error creating order:", error)
@@ -38,7 +36,7 @@ export const getOrders = async (filters = {}) => {
     if (filters.startDate) params.append("startDate", filters.startDate)
     if (filters.endDate) params.append("endDate", filters.endDate)
 
-    const response = await api.get(`/orders?${params.toString()}`)
+    const response = await api.get(`/api/orders?${params.toString()}`)
     return response.data
   } catch (error) {
     console.error("Error fetching orders:", error)
@@ -48,7 +46,7 @@ export const getOrders = async (filters = {}) => {
 
 export const getOrderById = async (id) => {
   try {
-    const response = await api.get(`/orders/${id}`)
+    const response = await api.get(`/api/orders/${id}`)
     return response.data
   } catch (error) {
     console.error("Error fetching order:", error)
@@ -58,7 +56,7 @@ export const getOrderById = async (id) => {
 
 export const updateOrder = async (id, orderData) => {
   try {
-    const response = await api.put(`/orders/${id}`, orderData)
+    const response = await api.put(`/api/orders/${id}`, orderData)
     return response.data
   } catch (error) {
     console.error("Error updating order:", error)
@@ -68,7 +66,7 @@ export const updateOrder = async (id, orderData) => {
 
 export const deleteOrder = async (id) => {
   try {
-    const response = await api.delete(`/orders/${id}`)
+    const response = await api.delete(`/api/orders/${id}`)
     return response.data
   } catch (error) {
     console.error("Error deleting order:", error)
@@ -78,12 +76,20 @@ export const deleteOrder = async (id) => {
 
 export const getOrderStats = async () => {
   try {
-    const response = await api.get("/orders/stats/summary")
+    const response = await api.get("/api/orders/stats/summary")
     return response.data
   } catch (error) {
     console.error("Error fetching stats:", error)
     throw error
   }
+}
+
+export const login = async (email, password) => {
+  const res = await api.post("/api/auth/login", {
+    email,
+    password,
+  })
+  return res.data
 }
 
 export default api

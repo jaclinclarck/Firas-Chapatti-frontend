@@ -1,9 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import axios from "axios"
 import { useNavigate } from "react-router-dom"
 import { UtensilsCrossed } from "lucide-react"
+import { login } from "../services/api"
 
 export default function Login({ setUser }) {
   const [email, setEmail] = useState("")
@@ -11,30 +11,23 @@ export default function Login({ setUser }) {
   const [error, setError] = useState("")
   const navigate = useNavigate()
   
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError("")
+    const handleSubmit = async (e) => {
+      e.preventDefault()
+      setError("")
 
-    console.log("Tentative de login :", { email, password })
+      try {
+        const userData = await login(
+          email.trim(),
+          password.trim()
+        )
 
-    try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", {
-        email: email.trim(),
-        password: password.trim(),
-      })
-
-      console.log("Réponse backend :", res.data)
-
-      const userData = res.data
-      localStorage.setItem("user", JSON.stringify(userData))
-      setUser(userData)
-
-      navigate("/app")
-    } catch (err) {
-      console.error(err.response?.data)
-      setError(err.response?.data?.message || "Erreur de connexion")
+        localStorage.setItem("user", JSON.stringify(userData))
+        setUser(userData)
+        navigate("/app")
+      } catch (err) {
+        setError(err?.response?.data?.message || "Erreur de connexion")
+      }
     }
-  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -112,7 +105,7 @@ export default function Login({ setUser }) {
 
             {/* BUTTON */}
             <button
-              type="submit"
+              type="submit" 
               className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold transition shadow-md"
             >
               Se connecter
