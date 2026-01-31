@@ -1,8 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Search, Eye, Trash2, RefreshCw } from "lucide-react"
+import { Search, Eye, Trash2, RefreshCw, Download } from "lucide-react"
 import { getOrders, deleteOrder, updateOrder } from "../services/api"
+import * as XLSX from "xlsx"
 
 function OrderHistory() {
   const [orders, setOrders] = useState([])
@@ -11,25 +12,47 @@ function OrderHistory() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [selectedOrder, setSelectedOrder] = useState(null)
+  const [selectedDate, setSelectedDate] = useState("")
 
-  const fetchOrders = async () => {
-    try {
-      setLoading(true)
-      const filters = statusFilter !== "all" ? { status: statusFilter } : {}
-      const data = await getOrders(filters)
-      setOrders(data)
-      setError(null)
-    } catch (err) {
-      console.error("Failed to load orders:", err)
-      setError("Erreur lors du chargement des commandes")
-    } finally {
-      setLoading(false)
+const fetchOrders = async () => {
+  try {
+    setLoading(true)
+
+    const filters = statusFilter !== "all" ? { status: statusFilter } : {}
+    const data = await getOrders(filters)
+
+    let filteredData = data
+
+    if (selectedDate) {
+      const selected = new Date(selectedDate)
+
+      filteredData = data.filter((order) => {
+        const d = new Date(order.createdAt)
+        return (
+          d.getDate() === selected.getDate() &&
+          d.getMonth() === selected.getMonth() &&
+          d.getFullYear() === selected.getFullYear()
+        )
+      })
     }
+
+    setOrders(filteredData)
+    setError(null)
+  } catch (err) {
+    console.error("Failed to load orders:", err)
+    setError("Erreur lors du chargement des commandes")
+  } finally {
+    setLoading(false)
   }
+}
 
   useEffect(() => {
     fetchOrders()
   }, [statusFilter])
+
+  useEffect(() => {
+  fetchOrders()
+}, [selectedDate])
 
   const formatPrice = (price) => {
     return (price / 1000).toFixed(3) + " DT"
@@ -91,6 +114,60 @@ function OrderHistory() {
     return matchesSearch
   })
 
+  const handleExportExcel = () => {
+  const exportData = filteredOrders.map((order) => ({
+    "Numéro commande": order.orderNumber,
+    "Date": new Date(order.createdAt).toLocaleString("fr-FR"),
+    "Client": order.customerName || "-",
+    "Statut": order.status,
+    "Paiement": order.paymentMethod,
+    "Total (DT)": (order.totalAmount / 1000).toFixed(3),
+    "Articles": order.items
+      .map(
+        (item) =>
+          `${item.quantity}x ${item.name}${
+            item.supplements.length
+              ? " (" +
+                item.supplements
+                  .map((s) => `${s.name} x${s.quantity}`)
+                  .join(", ") +
+                ")"
+              : ""
+          }`
+      )
+      .join(" | "),
+  }))
+
+  if (exportData.length === 0) {
+    alert("Aucune commande à exporter")
+    return
+  }
+
+  const worksheet = XLSX.utils.json_to_sheet(exportData)
+
+  worksheet["!cols"] = [
+    { wch: 18 }, // Numéro
+    { wch: 22 }, // Date
+    { wch: 20 }, // Client
+    { wch: 15 }, // Statut
+    { wch: 15 }, // Paiement
+    { wch: 15 }, // Total
+    { wch: 60 }, // Articles
+  ]
+
+  const workbook = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Historique commandes")
+
+  const labelDate = selectedDate
+    ? selectedDate
+    : new Date().toISOString().split("T")[0]
+
+  XLSX.writeFile(
+    workbook,
+    `historique-commandes-${labelDate}.xlsx`
+  )
+}
+
   return (
     <div className="space-y-6">
       {/* Filters */}
@@ -119,14 +196,38 @@ function OrderHistory() {
             <option value="cancelled">Annulé</option>
           </select>
         </div>
-        <button
-          onClick={fetchOrders}
-          disabled={loading}
-          className="mt-4 flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors disabled:opacity-50"
-        >
-          <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-          Actualiser
-        </button>
+  <button
+    onClick={fetchOrders}
+    disabled={loading}
+    className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors disabled:opacity-50"
+  >
+    <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+    Actualiser
+  </button>
+
+  <input
+    type="date"
+    value={selectedDate}
+    onChange={(e) => setSelectedDate(e.target.value)}
+    className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+  />
+
+  {selectedDate && (
+    <button
+      onClick={() => setSelectedDate("")}
+      className="px-3 py-2 text-sm bg-red-100 text-red-600 rounded-lg hover:bg-red-200"
+    >
+      Réinitialiser
+    </button>
+  )}
+
+  <button
+    onClick={handleExportExcel}
+    className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 transition-colors"
+  >
+    <Download size={16} />
+    Exporter Excel
+  </button>
       </div>
 
       {/* Orders List */}
@@ -176,8 +277,8 @@ function OrderHistory() {
                           <span className="text-xs text-gray-500">
                             {" "}
                             + {item.supplements
-      .map((s) => `${s.name} x${s.quantity}`)
-      .join(", ")}
+                            .map((s) => `${s.name} x${s.quantity}`)
+                            .join(", ")}
                           </span>
                         )}
                       </li>
