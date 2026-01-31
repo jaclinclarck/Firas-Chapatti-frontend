@@ -195,7 +195,11 @@ const fetchOrders = async () => {
             <option value="delivered">Livré</option>
             <option value="cancelled">Annulé</option>
           </select>
-        </div>
+       </div>
+
+{/* ACTIONS BAR */}
+<div className="flex flex-wrap items-center gap-3 mt-4">
+
   <button
     onClick={fetchOrders}
     disabled={loading}
@@ -228,7 +232,9 @@ const fetchOrders = async () => {
     <Download size={16} />
     Exporter Excel
   </button>
-      </div>
+
+</div>
+</div>
 
       {/* Orders List */}
       <div className="bg-white rounded-lg shadow-md">
