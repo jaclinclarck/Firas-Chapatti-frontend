@@ -1,11 +1,17 @@
 import axios from "axios"
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
+  baseURL: "https://fast-food-backend-qd11.onrender.com",
+  headers: { "Content-Type": "application/json" },
 })
+
+export const login = async (email, password) => {
+  const response = await api.post("/api/auth/login", {
+    email,
+    password,
+  })
+  return response.data
+}
 
 // Menu API
 export const getMenu = async () => {
@@ -84,12 +90,5 @@ export const getOrderStats = async () => {
   }
 }
 
-export const login = async (email, password) => {
-  const response = await api.post("/api/auth/login", {
-    email,
-    password,
-  })
-  return response.data
-}
 
 export default api

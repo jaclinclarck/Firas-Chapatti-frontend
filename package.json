@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Frontend React pour Jam-Jem Chapatti Restaurant",
   "type": "module",
+  "homepage": "https://github.com/jaclinclarck/Firas-Chapatti-frontend.git",
   "scripts": {
     "dev": "vite",
     "build": "node ./node_modules/vite/bin/vite.js build",

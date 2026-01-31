@@ -29,6 +29,7 @@ function Statistics({ t }) {
   const [paymentMethodsData, setPaymentMethodsData] = useState([])
   const [popularProducts, setPopularProducts] = useState([])
   const [period, setPeriod] = useState("today")
+  const [selectedDate, setSelectedDate] = useState("")
 
   useEffect(() => {
     fetchStatistics()
@@ -39,6 +40,12 @@ function Statistics({ t }) {
       applyPeriodFilter(period)
     }
   }, [period, orders])
+
+  useEffect(() => {
+  if (period === "day" && selectedDate) {
+    applyPeriodFilter("day")
+  }
+  }, [selectedDate])
 
   const fetchStatistics = async () => {
     try {
@@ -52,20 +59,35 @@ function Statistics({ t }) {
 
   const applyPeriodFilter = (selectedPeriod, sourceOrders = orders) => {
     const now = new Date()
+    let filteredOrders = []
 
-    let startDate = null
-    if (selectedPeriod === "today") {
-      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-    } else if (selectedPeriod === "week") {
-      startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-    } else if (selectedPeriod === "month") {
-      startDate = new Date(now.getFullYear(), now.getMonth(), 1)
+    if (selectedPeriod === "day" && selectedDate) {
+      filteredOrders = sourceOrders.filter((o) => {
+        const d = new Date(o.createdAt)
+        const selected = new Date(selectedDate)
+
+        return (
+          d.getDate() === selected.getDate() &&
+          d.getMonth() === selected.getMonth() &&
+          d.getFullYear() === selected.getFullYear()
+        )
+      })
+    } else {
+      let startDate = null
+
+      if (selectedPeriod === "today") {
+        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+      } else if (selectedPeriod === "week") {
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+      } else if (selectedPeriod === "month") {
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1)
+      }
+
+      filteredOrders =
+        selectedPeriod === "total"
+          ? sourceOrders
+          : sourceOrders.filter((o) => new Date(o.createdAt) >= startDate)
     }
-
-    const filteredOrders =
-      selectedPeriod === "total"
-        ? sourceOrders
-        : sourceOrders.filter((o) => new Date(o.createdAt) >= startDate)
 
     calculateStats(filteredOrders)
     calculateProducts(filteredOrders)
@@ -216,18 +238,43 @@ function Statistics({ t }) {
 
   const formatPrice = (price) => (price / 1000).toFixed(3) + " DT"
   const averageBasket = stats.orders ? stats.revenue / stats.orders : 0
-
+  console.log("STATISTICS VERSION 2026-OK")
   return (
     <div className="space-y-6">
       {/* HEADER */}
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">{t.statistics}</h2>
-        <button
-        onClick={handleExportExcel}
-        className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg"
-        ><Download size={18} /> {t.exportData}
-        </button>
-      </div>
+{/* HEADER */}
+<div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+  <h2 className="text-2xl font-bold">{t.statistics}</h2>
+
+  <div className="flex items-center gap-3">
+    {/* 📅 Filtre par jour */}
+    <input
+      type="date"
+      value={selectedDate}
+      onChange={(e) => {
+        const value = e.target.value
+        setSelectedDate(value)
+
+        if (value) {
+          setPeriod("day")
+        } else {
+          setPeriod("today")
+        }
+      }}
+      className="border rounded-lg px-3 py-2 text-sm"
+    />
+
+    {/* ⬇️ Export */}
+    <button
+      onClick={handleExportExcel}
+      className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg"
+    >
+      <Download size={18} />
+      {t.exportData}
+    </button>
+  </div>
+</div>
+
 
       {/* Period Tabs */}
       <div className="flex gap-2 bg-white p-2 rounded-lg shadow-sm">
@@ -249,6 +296,19 @@ function Statistics({ t }) {
         ))}
       </div>
 
+        {period === "day" && (
+        <div className="bg-white p-4 rounded-lg shadow-sm flex items-center gap-4">
+          <label className="text-sm font-medium text-gray-700">
+            Choisir une date :
+          </label>
+          <input
+            type="date"
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+            className="border rounded-lg px-3 py-2"
+          />
+        </div>
+      )}
       {/* STATS CARDS — DESIGN INCHANGÉ */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard icon={<ShoppingCart />} label={t.totalOrders} value={stats.orders} color="blue" />

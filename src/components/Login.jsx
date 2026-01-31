@@ -16,12 +16,18 @@ export default function Login({ setUser }) {
       setError("")
 
       try {
-        const userData = await login(email.trim(), password.trim())
+        const userData = await login({
+            email,
+            password,
+          })
+
         localStorage.setItem("user", JSON.stringify(userData))
         setUser(userData)
+
         navigate("/app")
       } catch (err) {
-        setError(err?.response?.data?.message || "Erreur de connexion")
+        console.error(err)
+        setError(err.response?.data?.message || "Erreur de connexion")
       }
     }
 
