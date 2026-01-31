@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
+import { HashRouter as Router, Routes, Route, Navigate } from "react-router-dom"
 import { ChefHat, History, ShoppingCart, BarChart3, SettingsIcon, LogOut } from "lucide-react"
 import OrderEntry from "./components/OrderEntry"
 import OrderHistory from "./components/OrderHistory"
