@@ -16,10 +16,7 @@ export default function Login({ setUser }) {
       setError("")
 
       try {
-        const userData = await login({
-            email,
-            password,
-          })
+        const userData = await login(email, password)
 
         localStorage.setItem("user", JSON.stringify(userData))
         setUser(userData)
