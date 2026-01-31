@@ -168,12 +168,15 @@ function Statistics({ t }) {
   }
 
     const handleExportExcel = () => {
-    const periodLabel = {
-        today: "Jour",
-        week: "Semaine",
-        month: "Mois",
-        total: "Total",
-    }[period]
+    const periodLabel =
+      period === "day" && selectedDate
+        ? new Date(selectedDate).toLocaleDateString("fr-FR")
+        : {
+            today: "Jour",
+            week: "Semaine",
+            month: "Mois",
+            total: "Total",
+          }[period]
 
     const avgBasket =
         stats.orders > 0 ? (stats.revenue / stats.orders) / 1000 : 0
@@ -242,38 +245,37 @@ function Statistics({ t }) {
   return (
     <div className="space-y-6">
       {/* HEADER */}
-{/* HEADER */}
-<div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-  <h2 className="text-2xl font-bold">{t.statistics}</h2>
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+        <h2 className="text-2xl font-bold">{t.statistics}</h2>
 
-  <div className="flex items-center gap-3">
-    {/* 📅 Filtre par jour */}
-    <input
-      type="date"
-      value={selectedDate}
-      onChange={(e) => {
-        const value = e.target.value
-        setSelectedDate(value)
+        <div className="flex items-center gap-3">
+          {/* 📅 Filtre par jour */}
+          <input
+            type="date"
+            value={selectedDate}
+            onChange={(e) => {
+              const value = e.target.value
+              setSelectedDate(value)
 
-        if (value) {
-          setPeriod("day")
-        } else {
-          setPeriod("today")
-        }
-      }}
-      className="border rounded-lg px-3 py-2 text-sm"
-    />
+              if (value) {
+                setPeriod("day")
+              } else {
+                setPeriod("today")
+              }
+            }}
+            className="border rounded-lg px-3 py-2 text-sm"
+          />
 
-    {/* ⬇️ Export */}
-    <button
-      onClick={handleExportExcel}
-      className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg"
-    >
-      <Download size={18} />
-      {t.exportData}
-    </button>
-  </div>
-</div>
+          {/* ⬇️ Export */}
+          <button
+            onClick={handleExportExcel}
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg"
+          >
+            <Download size={18} />
+            {t.exportData}
+          </button>
+        </div>
+      </div>
 
 
       {/* Period Tabs */}
