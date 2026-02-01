@@ -114,12 +114,20 @@ const fetchOrders = async () => {
     return matchesSearch
   })
 
+  const STATUS_LABELS = {
+  pending: "En attente",
+  preparing: "En préparation",
+  ready: "Prêt",
+  delivered: "Livré",
+  cancelled: "Annulé",
+  }
+
   const handleExportExcel = () => {
   const exportData = filteredOrders.map((order) => ({
     "Numéro commande": order.orderNumber,
     "Date": new Date(order.createdAt).toLocaleString("fr-FR"),
     "Client": order.customerName || "-",
-    "Statut": order.status,
+    "Statut": STATUS_LABELS[order.status] || order.status,
     "Paiement": order.paymentMethod,
     "Total (DT)": (order.totalAmount / 1000).toFixed(3),
     "Articles": order.items
@@ -197,44 +205,44 @@ const fetchOrders = async () => {
           </select>
        </div>
 
-{/* ACTIONS BAR */}
-<div className="flex flex-wrap items-center gap-3 mt-4">
+      {/* ACTIONS BAR */}
+      <div className="flex flex-wrap items-center gap-3 mt-4">
 
-  <button
-    onClick={fetchOrders}
-    disabled={loading}
-    className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors disabled:opacity-50"
-  >
-    <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-    Actualiser
-  </button>
+        <button
+          onClick={fetchOrders}
+          disabled={loading}
+          className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors disabled:opacity-50"
+        >
+          <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+          Actualiser
+        </button>
 
-  <input
-    type="date"
-    value={selectedDate}
-    onChange={(e) => setSelectedDate(e.target.value)}
-    className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-  />
+        <input
+          type="date"
+          value={selectedDate}
+          onChange={(e) => setSelectedDate(e.target.value)}
+          className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+        />
 
-  {selectedDate && (
-    <button
-      onClick={() => setSelectedDate("")}
-      className="px-3 py-2 text-sm bg-red-100 text-red-600 rounded-lg hover:bg-red-200"
-    >
-      Réinitialiser
-    </button>
-  )}
+        {selectedDate && (
+          <button
+            onClick={() => setSelectedDate("")}
+            className="px-3 py-2 text-sm bg-red-100 text-red-600 rounded-lg hover:bg-red-200"
+          >
+            Réinitialiser
+          </button>
+        )}
 
-  <button
-    onClick={handleExportExcel}
-    className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 transition-colors"
-  >
-    <Download size={16} />
-    Exporter Excel
-  </button>
+        <button
+          onClick={handleExportExcel}
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          <Download size={16} />
+          Exporter Excel
+        </button>
 
-</div>
-</div>
+      </div>
+      </div>
 
       {/* Orders List */}
       <div className="bg-white rounded-lg shadow-md">
