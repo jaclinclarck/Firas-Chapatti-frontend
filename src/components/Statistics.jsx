@@ -238,7 +238,7 @@ function Statistics({ t }) {
 
     // ✅ AJOUT DES LARGEURS DE COLONNES (SEULE MODIFICATION)
     summarySheet["!cols"] = [
-        { wch: 20 }, // Période
+        { wch: 35 }, // Période
         { wch: 20 }, // Total commandes
         { wch: 18 }, // Revenus
         { wch: 22 }, // Panier moyen
