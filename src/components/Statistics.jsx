@@ -167,16 +167,39 @@ function Statistics({ t }) {
     setRevenueData(days)
   }
 
+    const getPeriodLabel = () => {
+  const now = new Date()
+
+  if (period === "day" && selectedDate) {
+    return new Date(selectedDate).toLocaleDateString("fr-FR")
+  }
+
+  if (period === "today") {
+    return now.toLocaleDateString("fr-FR")
+  }
+
+  if (period === "week") {
+    const start = new Date(now)
+    start.setDate(now.getDate() - 6)
+
+    return `Semaine du ${start.toLocaleDateString("fr-FR")} au ${now.toLocaleDateString("fr-FR")}`
+  }
+
+  if (period === "month") {
+    return now.toLocaleDateString("fr-FR", {
+      month: "long",
+      year: "numeric",
+    })
+  }
+
+  if (period === "total") {
+    return "Toutes périodes"
+  }
+
+  return "-"
+}
     const handleExportExcel = () => {
-    const periodLabel =
-      period === "day" && selectedDate
-        ? new Date(selectedDate).toLocaleDateString("fr-FR")
-        : {
-            today: "Jour",
-            week: "Semaine",
-            month: "Mois",
-            total: "Total",
-          }[period]
+    const periodLabel = getPeriodLabel()
 
     const avgBasket =
         stats.orders > 0 ? (stats.revenue / stats.orders) / 1000 : 0
@@ -215,7 +238,7 @@ function Statistics({ t }) {
 
     // ✅ AJOUT DES LARGEURS DE COLONNES (SEULE MODIFICATION)
     summarySheet["!cols"] = [
-        { wch: 15 }, // Période
+        { wch: 20 }, // Période
         { wch: 20 }, // Total commandes
         { wch: 18 }, // Revenus
         { wch: 22 }, // Panier moyen
