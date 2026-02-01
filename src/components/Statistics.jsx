@@ -101,6 +101,7 @@ function Statistics({ t }) {
       revenue: filteredOrders.reduce((s, o) => s + o.totalAmount, 0),
       completed: filteredOrders.filter((o) => o.status === "completed").length,
       pending: filteredOrders.filter((o) => o.status === "pending").length,
+      cancelled: filteredOrders.filter((o) => o.status === "cancelled").length,
     })
   }
 
@@ -168,36 +169,36 @@ function Statistics({ t }) {
   }
 
     const getPeriodLabel = () => {
-  const now = new Date()
+    const now = new Date()
 
-  if (period === "day" && selectedDate) {
-    return new Date(selectedDate).toLocaleDateString("fr-FR")
+    if (period === "day" && selectedDate) {
+      return new Date(selectedDate).toLocaleDateString("fr-FR")
+    }
+
+    if (period === "today") {
+      return now.toLocaleDateString("fr-FR")
+    }
+
+    if (period === "week") {
+      const start = new Date(now)
+      start.setDate(now.getDate() - 6)
+
+      return `Semaine du ${start.toLocaleDateString("fr-FR")} au ${now.toLocaleDateString("fr-FR")}`
+    }
+
+    if (period === "month") {
+      return now.toLocaleDateString("fr-FR", {
+        month: "long",
+        year: "numeric",
+      })
+    }
+
+    if (period === "total") {
+      return "Toutes périodes"
+    }
+
+    return "-"
   }
-
-  if (period === "today") {
-    return now.toLocaleDateString("fr-FR")
-  }
-
-  if (period === "week") {
-    const start = new Date(now)
-    start.setDate(now.getDate() - 6)
-
-    return `Semaine du ${start.toLocaleDateString("fr-FR")} au ${now.toLocaleDateString("fr-FR")}`
-  }
-
-  if (period === "month") {
-    return now.toLocaleDateString("fr-FR", {
-      month: "long",
-      year: "numeric",
-    })
-  }
-
-  if (period === "total") {
-    return "Toutes périodes"
-  }
-
-  return "-"
-}
     const handleExportExcel = () => {
     const periodLabel = getPeriodLabel()
 
@@ -209,12 +210,13 @@ function Statistics({ t }) {
     // ========================
     const summaryData = [
         {
-        "Période": periodLabel,
+        "Période analysée": periodLabel,
         "Total commandes": stats.orders,
-        "Revenus (DT)": (stats.revenue / 1000).toFixed(2),
-        "Panier moyen (DT)": avgBasket.toFixed(2),
+        "Revenus (DT)": (stats.revenue / 1000).toFixed(3),
+        "Panier moyen (DT)": avgBasket.toFixed(3),
         "Commandes terminées": stats.completed,
         "En attente": stats.pending,
+        "Commandes annulées": stats.cancelled,
         "Date export": new Date().toLocaleDateString("fr-FR"),
         },
     ]
@@ -223,7 +225,7 @@ function Statistics({ t }) {
     // 🟩 FEUILLE 2 : PRODUITS
     // ========================
     const productsData = popularProducts.map((p) => ({
-        "Période": periodLabel,
+        "Période analysée": periodLabel,
         "Produit": p.name,
         "Quantité vendue": p.count,
     }))
@@ -244,11 +246,12 @@ function Statistics({ t }) {
         { wch: 22 }, // Panier moyen
         { wch: 24 }, // Commandes terminées
         { wch: 15 }, // En attente
+        { wch: 22 }, // Commandes annulées
         { wch: 18 }, // Date export
     ]
 
     productsSheet["!cols"] = [
-        { wch: 15 }, // Période
+        { wch: 35 }, // Période
         { wch: 40 }, // Produit
         { wch: 20 }, // Quantité vendue
     ]
